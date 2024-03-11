@@ -1,22 +1,36 @@
 import { render } from '../render';
 import SortView from '../view/sort-view.js';
-import EventListView from '../view/event-list-view.js';
-import EventItemView from '../view/event-point-view.js';
-import NewPointView from '../view/new-point-view.js';
+import PointListView from '../view/point-list-view.js';
+import PointView from '../view/point-view.js';
+import EditPointView from '../view/edit-point-view.js';
 
 export default class BoardPresenter {
-  constructor({ container }) {
+  constructor({ container, destinationsModel, offersModel, pointsModel }) {
     this.container = container;
+    this.destinationsModel = destinationsModel;
+    this.offersModel = offersModel;
+    this.pointsModel = pointsModel;
   }
 
   init() {
     render(new SortView(), this.container);
-    const eventList = new EventListView();
+
+    const eventList = new PointListView();
     render(eventList, this.container);
-    render(new NewPointView(), eventList.getElement());
-    const pointsCount = 3;
-    for (let i = 0; i < pointsCount; i++) {
-      render(new EventItemView(), eventList.getElement());
+
+    const points = [...this.pointsModel.get()];
+    render(new EditPointView({
+      point: points[0],
+      pointDestination: this.destinationsModel.getById(points[0].destination),
+      pointOffers: this.offersModel.getByType(points[0].type)
+    }), eventList.getElement());
+
+    for (let i = 1; i < points.length; i++) {
+      const point = points[i];
+      const pointDestination = this.destinationsModel.getById(point.destination);
+      const pointOffers = this.offersModel.getByType(point.type);
+      const pointView = new PointView({ point, pointDestination, pointOffers });
+      render(pointView, eventList.getElement());
     }
   }
 }

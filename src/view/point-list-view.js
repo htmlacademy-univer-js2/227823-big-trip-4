@@ -1,6 +1,6 @@
 import { createElement } from '../render';
 
-export default class EventListView {
+export default class PointListView {
   getTemplate() {
     return createEventListViewTemplate();
   }
