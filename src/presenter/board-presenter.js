@@ -1,4 +1,4 @@
-import { render } from '../framework/render.js';
+import { render, replace } from '../framework/render.js';
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointView from '../view/point-view.js';
@@ -39,7 +39,44 @@ export default class BoardPresenter {
   #renderPoint(point) {
     const pointDestination = this.#destinationsModel.getById(point.destination);
     const pointOffers = this.#offersModel.getByType(point.type);
-    const pointView = new PointView({ point, pointDestination, pointOffers });
+
+    const pointView = new PointView({
+      point,
+      pointDestination,
+      pointOffers,
+      onEditClick: () => {
+        replacePointToForm();
+        document.addEventListener('keydown', escKeyDown);
+      }
+    });
+    const editView = new EditPointView({
+      point,
+      pointDestination,
+      pointOffers,
+      onFormSubmit: () => {
+        replaceFormToPoint();
+        document.removeEventListener('keydown', escKeyDown);
+      },
+      onResetClick: () => {
+        replaceFormToPoint();
+        document.removeEventListener('keydown', escKeyDown);
+      }
+    });
+
+    function replacePointToForm() {
+      replace(editView, pointView);
+    }
+    function replaceFormToPoint() {
+      replace(pointView, editView);
+    }
+    function escKeyDown(evt) {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        document.removeEventListener('keydown', escKeyDown);
+        replaceFormToPoint();
+      }
+    }
+
     render(pointView, this.#pointListView.element);
   }
 }
