@@ -1,32 +1,24 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { formatDateToDateTimeHTML, formatDateToShortDate, formatDateToTime, formatDuration } from '../utils';
 
-export default class PointView {
+export default class PointView extends AbstractView {
+  #point;
+  #destination;
+  #offers;
 
   constructor({ point, pointDestination, pointOffers }) {
-    this.point = point;
-    this.destination = pointDestination;
-    this.offers = pointOffers.offers;
+    super();
+    this.#point = point;
+    this.#destination = pointDestination;
+    this.#offers = pointOffers.offers;
   }
 
-  getTemplate() {
+  get template() {
     return createEventPointViewTemplate({
-      point: this.point,
-      pointDestination: this.destination,
-      pointOffers: this.offers
+      point: this.#point,
+      pointDestination: this.#destination,
+      pointOffers: this.#offers
     });
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }
 
