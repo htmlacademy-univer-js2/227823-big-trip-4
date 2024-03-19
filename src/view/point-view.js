@@ -1,33 +1,34 @@
-import { createElement } from '../render';
-import { formatDateToDateTimeHTML, formatDateToShortDate, formatDateToTime, formatDuration } from '../utils';
+import AbstractView from '../framework/view/abstract-view';
+import { formatDateToDateTimeHTML, formatDateToShortDate, formatDateToTime, formatDuration } from '../utils/point';
 
-export default class PointView {
+export default class PointView extends AbstractView {
+  #point = null;
+  #destination = null;
+  #offers = null;
+  #handleEditClick = null;
 
-  constructor({ point, pointDestination, pointOffers }) {
-    this.point = point;
-    this.destination = pointDestination;
-    this.offers = pointOffers.offers;
+  constructor({ point, pointDestination, pointOffers, onEditClick }) {
+    super();
+    this.#point = point;
+    this.#destination = pointDestination;
+    this.#offers = pointOffers.offers;
+    this.#handleEditClick = onEditClick;
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
-  getTemplate() {
+  get template() {
     return createEventPointViewTemplate({
-      point: this.point,
-      pointDestination: this.destination,
-      pointOffers: this.offers
+      point: this.#point,
+      pointDestination: this.#destination,
+      pointOffers: this.#offers
     });
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }
 
 function createEventPointViewTemplate({ point, pointDestination, pointOffers }) {

@@ -1,34 +1,45 @@
-import { createElement } from '../render';
-import { formatDateToDateTime } from '../utils';
-import { POINT_EMPTY } from './const';
+import AbstractView from '../framework/view/abstract-view.js';
+import { formatDateToDateTime } from '../utils/point.js';
+import { POINT_EMPTY } from './const.js';
 
-export default class EditPointView {
+export default class EditPointView extends AbstractView {
+  #point = null;
+  #destination = null;
+  #offers = null;
+  #handleFormSubmit = null;
+  #handleResetForm = null;
 
-  constructor({ point = POINT_EMPTY, pointDestination, pointOffers }) {
-    this.point = point;
-    this.destination = pointDestination;
-    this.offers = pointOffers.offers;
+  constructor({ point = POINT_EMPTY, pointDestination, pointOffers, onFormSubmit, onResetClick }) {
+    super();
+    this.#point = point;
+    this.#destination = pointDestination;
+    this.#offers = pointOffers.offers;
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleResetForm = onResetClick;
+
+    this.element.querySelector('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#formResetHandler);
   }
 
-  getTemplate() {
+  get template() {
     return createEditPointViewTemplate({
-      point: this.point,
-      pointDestination: this.destination,
-      pointOffers: this.offers
+      point: this.#point,
+      pointDestination: this.#destination,
+      pointOffers: this.#offers
     });
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormSubmit();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #formResetHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleResetForm();
+  };
 }
 
 function createEditPointViewTemplate({ point, pointDestination, pointOffers }) {
@@ -136,7 +147,7 @@ function createEditPointViewTemplate({ point, pointDestination, pointOffers }) {
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
             <div class="event__available-offers">
-              ${createOffersTemplate({ selectedOffers: offers, pointOffers})}
+              ${createOffersTemplate({ selectedOffers: offers, pointOffers })}
             </div>
           </section>
 
@@ -155,7 +166,7 @@ function createEditPointViewTemplate({ point, pointDestination, pointOffers }) {
   `;
 }
 
-function createOffersTemplate({selectedOffers, pointOffers}) {
+function createOffersTemplate({ selectedOffers, pointOffers }) {
   return pointOffers.reduce((result, offer) =>
     `${result}
     <div class="event__offer-selector">
@@ -169,7 +180,7 @@ function createOffersTemplate({selectedOffers, pointOffers}) {
   );
 }
 
-function createImagesTemplate({destination}) {
+function createImagesTemplate({ destination }) {
   return destination.pictures.reduce((result, picture) => `
     ${result}<img class="event__photo" src="${picture.src}" alt="${picture.description}">
   `, '');

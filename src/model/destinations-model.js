@@ -1,4 +1,4 @@
-import { generateDestination } from '../mock/destination';
+import { generateDestination } from '../mock/destination.js';
 
 const DESTINATION_COUNT = 5;
 

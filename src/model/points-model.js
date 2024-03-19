@@ -1,6 +1,6 @@
-import { POINT_TYPES } from '../mock/const';
-import { generatePoint } from '../mock/point';
-import { getRandomInteger, getRandomValue } from '../utils';
+import { POINT_TYPES } from '../mock/const.js';
+import { generatePoint } from '../mock/point.js';
+import { getRandomInteger, getRandomValue } from '../utils/common.js';
 
 export default class PointsModel {
 
