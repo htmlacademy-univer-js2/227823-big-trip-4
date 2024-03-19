@@ -1,11 +1,11 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { formatDateToDateTime } from '../utils.js';
+import { formatDateToDateTime } from '../utils/point.js';
 import { POINT_EMPTY } from './const.js';
 
 export default class EditPointView extends AbstractView {
-  #point;
-  #destination;
-  #offers;
+  #point = null;
+  #destination = null;
+  #offers = null;
 
   constructor({ point = POINT_EMPTY, pointDestination, pointOffers }) {
     super();

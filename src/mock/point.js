@@ -1,4 +1,4 @@
-import { getRandomInteger } from '../utils';
+import { getRandomInteger } from '../utils/common.js';
 import dayjs from 'dayjs';
 
 function generatePoint(destinationId, type, offerIds) {

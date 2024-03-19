@@ -1,5 +1,5 @@
-import { POINT_TYPES } from '../mock/const';
-import { generateOffersByType } from '../mock/offer';
+import { POINT_TYPES } from '../mock/const.js';
+import { generateOffersByType } from '../mock/offer.js';
 
 export default class OffersModel {
 

@@ -1,10 +1,10 @@
 import AbstractView from '../framework/view/abstract-view';
-import { formatDateToDateTimeHTML, formatDateToShortDate, formatDateToTime, formatDuration } from '../utils';
+import { formatDateToDateTimeHTML, formatDateToShortDate, formatDateToTime, formatDuration } from '../utils/point';
 
 export default class PointView extends AbstractView {
-  #point;
-  #destination;
-  #offers;
+  #point = null;
+  #destination = null;
+  #offers = null;
 
   constructor({ point, pointDestination, pointOffers }) {
     super();
