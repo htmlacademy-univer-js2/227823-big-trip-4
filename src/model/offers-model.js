@@ -1,4 +1,4 @@
-import { POINT_TYPES } from '../mock/const.js';
+import { POINT_TYPES } from '../const.js';
 import { generateOffersByType } from '../mock/offer.js';
 
 export default class OffersModel {
@@ -12,11 +12,11 @@ export default class OffersModel {
   }
 
   getByType(type) {
-    return this.offers.find((offersList) => offersList.type === type);
+    return this.offers.find((offersList) => offersList.type === type).offers;
   }
 
   getById(type, id) {
-    return this.getByType(type).offers.find((offer) => offer.if === id);
+    return this.getByType(type).offers.find((offer) => offer.if === id).offers;
   }
 
 }

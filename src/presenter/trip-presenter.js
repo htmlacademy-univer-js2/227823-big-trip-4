@@ -4,7 +4,7 @@ import PointListView from '../view/point-list-view.js';
 import PointView from '../view/point-view.js';
 import EditPointView from '../view/edit-point-view.js';
 
-export default class BoardPresenter {
+export default class TripPresenter {
   #container = null;
   #destinationsModel = null;
   #offersModel = null;
@@ -25,10 +25,10 @@ export default class BoardPresenter {
     this.#sortView = new SortView();
     this.#pointListView = new PointListView();
     this.#points = [...this.#pointsModel.get()];
-    this.#renderBoard();
+    this.#renderTrip();
   }
 
-  #renderBoard() {
+  #renderTrip() {
     render(this.#sortView, this.#container);
     render(this.#pointListView, this.#container);
     for (let i = 0; i < this.#points.length; i++) {
@@ -51,8 +51,8 @@ export default class BoardPresenter {
     });
     const editView = new EditPointView({
       point,
-      pointDestination,
-      pointOffers,
+      destinations: this.#destinationsModel.get(),
+      offers: this.#offersModel.get(),
       onFormSubmit: () => {
         replaceFormToPoint();
         document.removeEventListener('keydown', escKeyDown);

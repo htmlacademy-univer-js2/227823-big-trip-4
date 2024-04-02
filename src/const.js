@@ -1,4 +1,15 @@
-import { POINT_TYPES } from '../mock/const';
+
+const POINT_TYPES = [
+  'taxi',
+  'bus',
+  'train',
+  'ship',
+  'drive',
+  'flight',
+  'check-in',
+  'sightseeing',
+  'restaurant',
+];
 
 const POINT_EMPTY = {
   id: crypto.randomUUID(),
@@ -11,4 +22,5 @@ const POINT_EMPTY = {
   type: POINT_TYPES[0]
 };
 
-export { POINT_EMPTY };
+export { POINT_TYPES, POINT_EMPTY };
+

@@ -1,19 +1,21 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { formatDateToDateTime } from '../utils/point.js';
-import { POINT_EMPTY } from './const.js';
+import { POINT_TYPES, POINT_EMPTY } from '../const.js';
+import { capitalizeFirstLetter } from '../utils/common.js';
 
 export default class EditPointView extends AbstractView {
   #point = null;
-  #destination = null;
+  #destinations = null;
   #offers = null;
   #handleFormSubmit = null;
   #handleResetForm = null;
 
-  constructor({ point = POINT_EMPTY, pointDestination, pointOffers, onFormSubmit, onResetClick }) {
+  constructor({ point = POINT_EMPTY, destinations, offers, onFormSubmit, onResetClick }) {
     super();
     this.#point = point;
-    this.#destination = pointDestination;
-    this.#offers = pointOffers.offers;
+    this.#destinations = destinations;
+    this.#offers = offers;
+
     this.#handleFormSubmit = onFormSubmit;
     this.#handleResetForm = onResetClick;
 
@@ -26,8 +28,8 @@ export default class EditPointView extends AbstractView {
   get template() {
     return createEditPointViewTemplate({
       point: this.#point,
-      pointDestination: this.#destination,
-      pointOffers: this.#offers
+      destinations: this.#destinations,
+      offers: this.#offers
     });
   }
 
@@ -42,98 +44,48 @@ export default class EditPointView extends AbstractView {
   };
 }
 
-function createEditPointViewTemplate({ point, pointDestination, pointOffers }) {
-  const { basePrice, dateFrom, dateTo, offers, type } = point;
+function createEditPointViewTemplate({ point, destinations, offers }) {
+  const { id, type, offers: selectedOffersIds, destination: destinationId, basePrice, dateFrom, dateTo } = point;
+  const selectedDestination = destinations.find((destination) => destination.id === destinationId);
+  const suitableOffers = offers.find((offer) => offer.type === type).offers;
 
   return /* html */ `
     <li class="trip-events__item">
       <form class="event event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
-            <label class="event__type  event__type-btn" for="event-type-toggle-1">
+            <label class="event__type  event__type-btn" for="event-type-toggle-${id}">
               <span class="visually-hidden">Choose event type</span>
               <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
             </label>
-            <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+            <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox">
 
-            <div class="event__type-list">
-              <fieldset class="event__type-group">
-                <legend class="visually-hidden">Event type</legend>
-
-                <div class="event__type-item">
-                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-                  <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-                  <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-                  <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-                  <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-                  <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-                  <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-                  <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-                  <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-                  <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-                </div>
-              </fieldset>
-            </div>
-          </div>
+            ${createEventTypesTemplate({ pointId: id, eventTypes: POINT_TYPES, selectedType: type })}
 
           <div class="event__field-group  event__field-group--destination">
-            <label class="event__label  event__type-output" for="event-destination-1">
+            <label class="event__label  event__type-output" for="event-destination-${id}">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${pointDestination.name}" list="destination-list-1">
-            <datalist id="destination-list-1">
-              <option value="Amsterdam"></option>
-              <option value="Geneva"></option>
-              <option value="Chamonix"></option>
+            <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${selectedDestination.name}" list="destination-list-${id}">
+            <datalist id="destination-list-${id}">
+              ${createDestinationOptionsTemplate({ destinations })}
             </datalist>
           </div>
 
           <div class="event__field-group  event__field-group--time">
-            <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateToDateTime(dateFrom)}">
+            <label class="visually-hidden" for="event-start-time-${id}">From</label>
+            <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${formatDateToDateTime(dateFrom)}">
             &mdash;
-            <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateToDateTime(dateTo)}">
+            <label class="visually-hidden" for="event-end-time-${id}">To</label>
+            <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${formatDateToDateTime(dateTo)}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
-            <label class="event__label" for="event-price-1">
+            <label class="event__label" for="event-price-${id}">
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+            <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -147,16 +99,16 @@ function createEditPointViewTemplate({ point, pointDestination, pointOffers }) {
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
             <div class="event__available-offers">
-              ${createOffersTemplate({ selectedOffers: offers, pointOffers })}
+              ${createOffersTemplate({ pointId: id, selectedOffersIds, offers: suitableOffers })}
             </div>
           </section>
 
           <section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">Chamonix-Mont-Blanc (usually shortened to Chamonix) is a resort area near the junction of France, Switzerland and Italy. At the base of Mont Blanc, the highest summit in the Alps, it's renowned for its skiing.</p>
+            <p class="event__destination-description">${selectedDestination.description}</p>
             <div class="event__photos-container">
               <div class="event__photos-tape">
-                ${createImagesTemplate({ destination: pointDestination })}
+                ${createImagesTemplate({ destination: selectedDestination })}
               </div>
             </div>
             </section>
@@ -166,12 +118,31 @@ function createEditPointViewTemplate({ point, pointDestination, pointOffers }) {
   `;
 }
 
-function createOffersTemplate({ selectedOffers, pointOffers }) {
-  return pointOffers.reduce((result, offer) =>
-    `${result}
+function createEventTypesTemplate({ pointId, eventTypes, selectedType }) {
+  return /* html */`
+    <div class="event__type-list">
+        <fieldset class="event__type-group">
+          <legend class="visually-hidden">Event type</legend>
+          ${eventTypes.map((type) => (`
+          <div class="event__type-item">
+            <input id="event-type-${type}-${pointId}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${type === selectedType ? 'checked="checked"' : ''}>
+            <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-${pointId}">${capitalizeFirstLetter(type)}</label>
+          </div>`)).join('')}
+        </fieldset>
+      </div>
+    </div>`;
+}
+
+function createDestinationOptionsTemplate({ destinations }) {
+  return destinations.map((destination) => `<option value="${destination.name}"></option>`).join('');
+}
+
+function createOffersTemplate({ pointId, selectedOffersIds, offers }) {
+  return offers.reduce((result, offer) =>
+    /* html */`${result}
     <div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" ${selectedOffers.includes(offer.id) ? 'checked' : ''}>
-      <label class="event__offer-label" for="event-offer-luggage-1">
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.id}-${pointId}" type="checkbox" name="event-offer-${offer.id}" ${selectedOffersIds.includes(offer.id) ? 'checked' : ''}>
+      <label class="event__offer-label" for="event-offer-${offer.id}-${pointId}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${offer.price}</span>
@@ -184,5 +155,4 @@ function createImagesTemplate({ destination }) {
   return destination.pictures.reduce((result, picture) => `
     ${result}<img class="event__photo" src="${picture.src}" alt="${picture.description}">
   `, '');
-
 }

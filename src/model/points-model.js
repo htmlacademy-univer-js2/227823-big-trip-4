@@ -1,4 +1,4 @@
-import { POINT_TYPES } from '../mock/const.js';
+import { POINT_TYPES } from '../const.js';
 import { generatePoint } from '../mock/point.js';
 import { getRandomInteger, getRandomValue } from '../utils/common.js';
 
@@ -10,7 +10,7 @@ export default class PointsModel {
     this.points = Array.from({ length: pointCount }, () => {
       const destination = getRandomValue(destinationsModel.get());
       const type = getRandomValue(POINT_TYPES);
-      const offers = offersModel.getByType(type).offers.slice(0, getRandomInteger(0, 3));
+      const offers = offersModel.getByType(type).slice(0, getRandomInteger(0, 3));
       return generatePoint(destination.id, type, offers.map((offer) => offer.id));
     });
   }
