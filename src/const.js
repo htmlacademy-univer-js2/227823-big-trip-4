@@ -22,5 +22,12 @@ const POINT_EMPTY = {
   type: POINT_TYPES[0]
 };
 
-export { POINT_TYPES, POINT_EMPTY };
+const FilterType = {
+  EVERYTHING: 'everything',
+  PAST: 'past',
+  PRESENT: 'present',
+  FUTURE: 'future',
+};
+
+export { POINT_TYPES, POINT_EMPTY, FilterType };
 

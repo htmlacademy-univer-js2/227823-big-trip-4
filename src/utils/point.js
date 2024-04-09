@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
+import duration from 'dayjs/plugin/duration.js';
 
 dayjs.extend(duration);
 
@@ -36,4 +36,17 @@ function formatDuration(dateFrom, dateTo) {
   return pointDuration;
 }
 
-export { formatDateToShortDate, formatDateToDateTimeHTML, formatDateToDateTime, formatDateToTime, formatDuration };
+const isPointPast = (point) => dayjs().isAfter(point.dateTo);
+const isPointPresent = (point) => dayjs().isBefore(point.dateTo) && dayjs().isAfter(point.dateFrom);
+const isPointFuture = (point) => dayjs().isBefore(point.dateFrom);
+
+export {
+  formatDateToShortDate,
+  formatDateToDateTimeHTML,
+  formatDateToDateTime,
+  formatDateToTime,
+  formatDuration,
+  isPointPast,
+  isPointPresent,
+  isPointFuture,
+};
