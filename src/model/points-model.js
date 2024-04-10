@@ -5,9 +5,9 @@ import { getRandomInteger, getRandomValue } from '../utils/common.js';
 export default class PointsModel {
 
   constructor(destinationsModel, offersModel) {
-    const pointCount = 5;
+    const pointCount = { MIN: 0, MAX: 3 };
 
-    this.points = Array.from({ length: pointCount }, () => {
+    this.points = Array.from({ length: getRandomInteger(pointCount.MIN, pointCount.MAX) }, () => {
       const destination = getRandomValue(destinationsModel.get());
       const type = getRandomValue(POINT_TYPES);
       const offers = offersModel.getByType(type).slice(0, getRandomInteger(0, 3));

@@ -5,6 +5,7 @@ import PointsModel from './model/points-model.js';
 import TripPresenter from './presenter/trip-presenter.js';
 import FilterPresenter from './presenter/filter-presenter.js';
 import FilterModel from './model/filter-model.js';
+import { getRandomFilter } from './mock/filter.js';
 
 
 const filterContainer = document.querySelector('.trip-controls__filters');
@@ -14,17 +15,19 @@ const destinationsModel = new DestinationsModel();
 const offersModel = new OffersModel();
 const pointsModel = new PointsModel(destinationsModel, offersModel);
 const filterModel = new FilterModel();
+filterModel.set(getRandomFilter());
 
 const filterPresenter = new FilterPresenter({
   container: filterContainer,
-  filterModel: filterModel,
-  pointsModel: pointsModel,
+  filterModel,
+  pointsModel,
 });
 const tripPresenter = new TripPresenter({
   container: tripContainer,
   destinationsModel,
   offersModel,
-  pointsModel
+  pointsModel,
+  filterModel,
 });
 
 filterPresenter.init();

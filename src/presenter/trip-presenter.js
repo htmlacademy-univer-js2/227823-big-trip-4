@@ -3,29 +3,38 @@ import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointView from '../view/point-view.js';
 import EditPointView from '../view/edit-point-view.js';
+import PointListEmptyView from '../view/point-list-empty-view.js';
 
 export default class TripPresenter {
   #container = null;
   #destinationsModel = null;
   #offersModel = null;
   #pointsModel = null;
+  #filterModel = null;
 
   #sortView = null;
   #pointListView = null;
+  #emptyListView = null;
   #points = [];
 
-  constructor({ container, destinationsModel, offersModel, pointsModel }) {
+  constructor({ container, destinationsModel, offersModel, pointsModel, filterModel }) {
     this.#container = container;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
     this.#pointsModel = pointsModel;
+    this.#filterModel = filterModel;
   }
 
   init() {
     this.#sortView = new SortView();
-    this.#pointListView = new PointListView();
     this.#points = [...this.#pointsModel.get()];
-    this.#renderTrip();
+    this.#pointListView = new PointListView();
+    this.#emptyListView = new PointListEmptyView({ filter: this.#filterModel.get() });
+    if (this.#points.length) {
+      this.#renderTrip();
+    } else {
+      render(this.#emptyListView, this.#container);
+    }
   }
 
   #renderTrip() {
