@@ -1,15 +1,17 @@
-import { getRandomValue, getRandomInteger } from '../utils/common.js';
+import { getRandomInteger, shuffle } from '../utils/common.js';
 import { CITIES, DESCRIPTION } from './const.js';
 
 
+const cities = shuffle([...CITIES]);
+
 function generateDestination() {
-  const city = getRandomValue(CITIES);
+  const city = cities.pop();
   const maxPictures = 5;
 
   return {
     id: crypto.randomUUID(),
     name: city,
-    description: DESCRIPTION,
+    description: `${city} description: ${DESCRIPTION}`,
     pictures: Array.from({ length: getRandomInteger(0, maxPictures) }, generatePicture),
   };
 

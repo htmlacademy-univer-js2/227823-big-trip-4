@@ -1,5 +1,5 @@
-import AbstractView from '../framework/view/abstract-view';
-import { formatDateToDateTimeHTML, formatDateToShortDate, formatDateToTime, formatDuration } from '../utils/point';
+import AbstractView from '../framework/view/abstract-view.js';
+import { formatDateToDateTimeHTML, formatDateToShortDate, formatDateToTime, formatDuration } from '../utils/point.js';
 
 export default class PointView extends AbstractView {
   #point = null;
@@ -11,7 +11,7 @@ export default class PointView extends AbstractView {
     super();
     this.#point = point;
     this.#destination = pointDestination;
-    this.#offers = pointOffers.offers;
+    this.#offers = pointOffers;
     this.#handleEditClick = onEditClick;
     this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#editClickHandler);
@@ -32,7 +32,7 @@ export default class PointView extends AbstractView {
 }
 
 function createEventPointViewTemplate({ point, pointDestination, pointOffers }) {
-  const { basePrice, dateFrom, dateTo, offers, isFavorite, type } = point;
+  const { type, offers: selectedOffersIds, basePrice, dateFrom, dateTo, isFavorite } = point;
 
   return /* html */ `
     <li class="trip-events__item">
@@ -55,7 +55,7 @@ function createEventPointViewTemplate({ point, pointDestination, pointOffers }) 
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${createOffersTemplate({ offers, pointOffers })}
+          ${createOffersTemplate({ selectedOffersIds, pointOffers })}
         </ul>
         <button class="event__favorite-btn ${isFavorite ? 'event__favorite-btn--active' : ''}" type="button">
           <span class="visually-hidden">Add to favorite</span>
@@ -71,14 +71,13 @@ function createEventPointViewTemplate({ point, pointDestination, pointOffers }) 
   `;
 }
 
-function createOffersTemplate({ offers, pointOffers }) {
-  const selectedOffers = pointOffers.filter((offer) => offers.includes(offer.id));
-  return selectedOffers.reduce((result, current) =>
-    `${result}
-      <li class="event__offer">
-        <span class="event__offer-title">${current.title}</span>
+function createOffersTemplate({ selectedOffersIds, pointOffers }) {
+  const selectedOffers = pointOffers.filter((offer) => selectedOffersIds.includes(offer.id));
+  return selectedOffers.map((offer) =>
+    `<li class="event__offer">
+        <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
-        <span class="event__offer-price">${current.price}</span>
+        <span class="event__offer-price">${offer.price}</span>
       </li>
-    `, '');
+    `).join('');
 }

@@ -1,25 +1,34 @@
-import DestinationsModel from './model/destinations-model';
-import OffersModel from './model/offers-model';
-import PointsModel from './model/points-model';
+import DestinationsModel from './model/destinations-model.js';
+import OffersModel from './model/offers-model.js';
+import PointsModel from './model/points-model.js';
 
-import BoardPresenter from './presenter/board-presenter';
-import FilterPresenter from './presenter/filter-presenter';
+import TripPresenter from './presenter/trip-presenter.js';
+import FilterPresenter from './presenter/filter-presenter.js';
+import FilterModel from './model/filter-model.js';
+import { getRandomFilter } from './mock/filter.js';
 
 
 const filterContainer = document.querySelector('.trip-controls__filters');
-const boardContainer = document.querySelector('.trip-events');
+const tripContainer = document.querySelector('.trip-events');
 
 const destinationsModel = new DestinationsModel();
 const offersModel = new OffersModel();
 const pointsModel = new PointsModel(destinationsModel, offersModel);
+const filterModel = new FilterModel();
+filterModel.set(getRandomFilter());
 
-const filterPresenter = new FilterPresenter({container: filterContainer});
-const boardPresenter = new BoardPresenter({
-  container: boardContainer,
+const filterPresenter = new FilterPresenter({
+  container: filterContainer,
+  filterModel,
+  pointsModel,
+});
+const tripPresenter = new TripPresenter({
+  container: tripContainer,
   destinationsModel,
   offersModel,
-  pointsModel
+  pointsModel,
+  filterModel,
 });
 
 filterPresenter.init();
-boardPresenter.init();
+tripPresenter.init();

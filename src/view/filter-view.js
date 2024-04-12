@@ -1,34 +1,34 @@
-import AbstractView from '../framework/view/abstract-view';
+import { FilterType } from '../const.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import { capitalizeFirstLetter } from '../utils/common.js';
 
 export default class FilterView extends AbstractView {
+  #activeFilters = [];
+  #selected = null;
+
+  constructor({ activeFilters, selectedFilter }) {
+    super();
+    this.#activeFilters = activeFilters;
+    this.#selected = selectedFilter;
+  }
+
   get template() {
-    return createFilterTemplate();
+    return createFilterTemplate({ activeFilters: this.#activeFilters, selected: this.#selected });
   }
 }
 
-function createFilterTemplate() {
+function createFilterTemplate({ activeFilters, selected }) {
   return /* html */`
     <form class="trip-filters" action="#" method="get">
-      <div class="trip-filters__filter">
-        <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything">
-        <label class="trip-filters__filter-label" for="filter-everything">Everything</label>
-      </div>
-
-      <div class="trip-filters__filter">
-        <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future">
-        <label class="trip-filters__filter-label" for="filter-future">Future</label>
-      </div>
-
-      <div class="trip-filters__filter">
-        <input id="filter-present" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="present">
-        <label class="trip-filters__filter-label" for="filter-present">Present</label>
-      </div>
-
-      <div class="trip-filters__filter">
-        <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="past" checked>
-        <label class="trip-filters__filter-label" for="filter-past">Past</label>
-      </div>
-
+      ${Object.values(FilterType).map((filter) => createFilter(filter, activeFilters.includes(filter), filter === selected)).join('')}
       <button class="visually-hidden" type="submit">Accept filter</button>
     </form>`;
+
+  function createFilter(filter, enabled, checked) {
+    return /* html */`
+      <div class="trip-filters__filter">
+        <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${filter}"${enabled || checked ? '' : 'disabled'} ${checked ? 'checked' : ''}>
+        <label class="trip-filters__filter-label" for="filter-${filter}">${capitalizeFirstLetter(filter)}</label>
+      </div>`;
+  }
 }
