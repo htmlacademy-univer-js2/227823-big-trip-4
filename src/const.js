@@ -29,10 +29,5 @@ const FilterType = {
   FUTURE: 'future',
 };
 
-const PointMode = {
-  DEFAULT: 'default',
-  EDIT: 'edit',
-};
-
-export { POINT_TYPES, POINT_EMPTY, FilterType, PointMode };
+export { POINT_TYPES, POINT_EMPTY, FilterType };
 

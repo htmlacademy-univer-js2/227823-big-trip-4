@@ -2,7 +2,7 @@ import { render } from '../framework/render.js';
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointListEmptyView from '../view/point-list-empty-view.js';
-import PointPresenter from './point-presenter.js';
+import PointPresenter, { PointMode } from './point-presenter.js';
 
 export default class TripPresenter {
   #container = null;
@@ -16,6 +16,7 @@ export default class TripPresenter {
   #emptyListView = null;
   #points = [];
   #pointPresenters = new Map();
+  #openedEditPointId = null;
 
   constructor({ container, destinationsModel, offersModel, pointsModel, filterModel }) {
     this.#container = container;
@@ -55,8 +56,27 @@ export default class TripPresenter {
       destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
       pointsModel: this.#pointsModel,
+      onDataChange: this.#pointChangeHandler,
+      onModeChange: this.#modeChangeHandler,
     });
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
   }
+
+  #modeChangeHandler = (id, mode) => {
+    if (mode === PointMode.DEFAULT) {
+      this.#openedEditPointId = null;
+    } else {
+      if (this.#openedEditPointId !== null) {
+        this.#pointPresenters.get(this.#openedEditPointId).resetView();
+      }
+      this.#openedEditPointId = id;
+    }
+  };
+
+  #pointChangeHandler = (updatePoint) => {
+    const index = this.#points.findIndex((point) => point.id === updatePoint.id);
+    this.#points[index] = updatePoint;
+    this.#pointPresenters.get(updatePoint.id).init(updatePoint);
+  };
 }
