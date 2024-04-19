@@ -9,8 +9,8 @@ function generatePoint(destinationId, type, offerIds) {
   return {
     id: crypto.randomUUID(),
     basePrice: getRandomInteger(10, maxBasePrice),
-    dateFrom: dateFrom,
-    dateTo: dateTo,
+    dateFrom: dateFrom.toISOString(),
+    dateTo: dateTo.toISOString(),
     destination: destinationId,
     isFavorite: Boolean(getRandomInteger()),
     offers: offerIds,
