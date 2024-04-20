@@ -29,5 +29,17 @@ const FilterType = {
   FUTURE: 'future',
 };
 
-export { POINT_TYPES, POINT_EMPTY, FilterType };
+const SortTypes = {
+  DAY: 'day',
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+  OFFERS: 'offers'
+};
+
+const ENABLED_SORT_TYPES = [
+  SortTypes.DAY, SortTypes.TIME, SortTypes.PRICE
+];
+
+export { POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES };
 

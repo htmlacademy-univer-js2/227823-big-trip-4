@@ -1,8 +1,10 @@
-import { render } from '../framework/render.js';
+import { remove, render, replace } from '../framework/render.js';
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointListEmptyView from '../view/point-list-empty-view.js';
 import PointPresenter, { PointMode } from './point-presenter.js';
+import { ENABLED_SORT_TYPES, SortTypes } from '../const.js';
+import { sort } from '../utils/sort.js';
 
 export default class TripPresenter {
   #container = null;
@@ -17,6 +19,7 @@ export default class TripPresenter {
   #points = [];
   #pointPresenters = new Map();
   #openedEditPointId = null;
+  #currentSortType = SortTypes.DAY;
 
   constructor({ container, destinationsModel, offersModel, pointsModel, filterModel }) {
     this.#container = container;
@@ -27,8 +30,7 @@ export default class TripPresenter {
   }
 
   init() {
-    this.#sortView = new SortView();
-    this.#points = [...this.#pointsModel.get()];
+    this.#points = sort[this.#currentSortType]([...this.#pointsModel.get()]);
     this.#pointListView = new PointListView();
     this.#emptyListView = new PointListEmptyView({ filter: this.#filterModel.get() });
     if (this.#points.length) {
@@ -39,9 +41,33 @@ export default class TripPresenter {
   }
 
   #renderTrip() {
-    render(this.#sortView, this.#container);
+    this.#renderSort();
     render(this.#pointListView, this.#container);
     this.#renderPoints();
+  }
+
+  #renderSort() {
+    const prevSortView = this.#sortView;
+    const sortTypes = Object.values(SortTypes).map((type) => ({
+      type: type,
+      enabled: ~ENABLED_SORT_TYPES.indexOf(type),
+    }));
+    this.#sortView = new SortView({
+      types: sortTypes,
+      selected: this.#currentSortType,
+      onTypeChanged: this.#sortTypeChangeHandler
+    });
+    if (prevSortView) {
+      replace(this.#sortView, prevSortView);
+      remove(prevSortView);
+    } else {
+      render(this.#sortView, this.#container);
+    }
+  }
+
+  #sortPoints(type) {
+    this.#currentSortType = type;
+    this.#points = sort[type](this.#points);
   }
 
   #renderPoints() {
@@ -62,6 +88,19 @@ export default class TripPresenter {
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
   }
+
+  #clearPointList() {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+    this.#openedEditPointId = null;
+  }
+
+  #sortTypeChangeHandler = (type) => {
+    this.#sortPoints(type);
+    this.#clearPointList();
+    this.#renderSort();
+    this.#renderPoints();
+  };
 
   #modeChangeHandler = (id, mode) => {
     if (mode === PointMode.DEFAULT) {
