@@ -44,7 +44,7 @@ export default class PointPresenter {
       destinations: this.#destinationsModel.get(),
       offers: this.#offersModel.get(),
       onFormSubmit: this.#formSubmitHandler,
-      onCancelClick: this.#cancelClickHandler,
+      onFormCancel: this.#formCancelHandler,
     });
 
     if (prevPointDefaultView === null || prevPointEditView === null) {
@@ -75,36 +75,33 @@ export default class PointPresenter {
 
   #replacePointToForm() {
     this.#mode = PointMode.EDIT;
+    document.addEventListener('keydown', this.#escKeyDown);
     this.#handleModeChange(this.#point.id, this.#mode);
     replace(this.#pointEditView, this.#pointDefaultView);
   }
 
   #replaceFormToPoint() {
     this.#mode = PointMode.DEFAULT;
+    document.removeEventListener('keydown', this.#escKeyDown);
     this.#handleModeChange(this.#point.id, this.#mode);
     replace(this.#pointDefaultView, this.#pointEditView);
-
   }
 
   #editClickHandler = () => {
     this.#replacePointToForm();
-    document.addEventListener('keydown', this.#escKeyDown);
   };
 
   #formSubmitHandler = () => {
     this.#replaceFormToPoint();
-    document.removeEventListener('keydown', this.#escKeyDown);
   };
 
-  #cancelClickHandler = () => {
+  #formCancelHandler = () => {
     this.#replaceFormToPoint();
-    document.removeEventListener('keydown', this.#escKeyDown);
   };
 
   #escKeyDown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      document.removeEventListener('keydown', this.#escKeyDown);
       this.#replaceFormToPoint();
     }
   };
