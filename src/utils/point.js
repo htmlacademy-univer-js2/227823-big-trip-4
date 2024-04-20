@@ -40,6 +40,10 @@ const isPointPast = (point) => dayjs().isAfter(point.dateTo);
 const isPointPresent = (point) => dayjs().isBefore(point.dateTo) && dayjs().isAfter(point.dateFrom);
 const isPointFuture = (point) => dayjs().isBefore(point.dateFrom);
 
+const getDateDifference = (pointA, pointB) => dayjs(pointB.dateFrom).diff(dayjs(pointA.dateFrom));
+const getDurationDifference = (pointA, pointB) => (dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom))) - (dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom)));
+const getPriceDifference = (pointA, pointB) => pointB.basePrice - pointA.basePrice;
+
 export {
   formatDateToShortDate,
   formatDateToDateTimeHTML,
@@ -49,4 +53,7 @@ export {
   isPointPast,
   isPointPresent,
   isPointFuture,
+  getDateDifference,
+  getDurationDifference,
+  getPriceDifference,
 };
