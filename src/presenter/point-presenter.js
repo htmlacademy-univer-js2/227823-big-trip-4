@@ -64,6 +64,7 @@ export default class PointPresenter {
 
   resetView() {
     if (this.#mode === PointMode.EDIT) {
+      this.#pointEditView.reset(this.#point);
       this.#replaceFormToPoint();
     }
   }
@@ -96,12 +97,14 @@ export default class PointPresenter {
   };
 
   #formCancelHandler = () => {
+    this.#pointEditView.reset(this.#point);
     this.#replaceFormToPoint();
   };
 
   #escKeyDown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
+      this.#pointEditView.reset(this.#point);
       this.#replaceFormToPoint();
     }
   };

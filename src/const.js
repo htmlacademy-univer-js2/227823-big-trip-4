@@ -16,7 +16,7 @@ const POINT_EMPTY = {
   basePrice: 0,
   dateFrom: Date.now(),
   dateTo: Date.now(),
-  destination: '',
+  destination: null,
   isFavorite: false,
   offers: [],
   type: POINT_TYPES[0]
