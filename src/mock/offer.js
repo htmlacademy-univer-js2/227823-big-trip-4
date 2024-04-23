@@ -7,7 +7,7 @@ function generateOffersByType(type) {
 
   return {
     type: type,
-    offers: Array.from({ length: getRandomInteger(1, 5) }, generateOffer)
+    offers: Array.from({ length: getRandomInteger(0, 5) }, generateOffer)
   };
 
   function generateOffer() {
