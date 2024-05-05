@@ -9,15 +9,17 @@ export default class EditPointView extends AbstractStatefulView {
   #destinations = null;
   #offers = null;
   #handleFormSubmit = null;
+  #handleFormReset = null;
   #handleFormCancel = null;
   #datepickerFrom = null;
   #datepickerTo = null;
 
-  constructor({ point = POINT_EMPTY, destinations, offers, onFormSubmit, onFormCancel }) {
+  constructor({ point = POINT_EMPTY, destinations, offers, onFormSubmit, onFormReset, onFormCancel }) {
     super();
     this.#destinations = destinations;
     this.#offers = offers;
     this.#handleFormSubmit = onFormSubmit;
+    this.#handleFormReset = onFormReset;
     this.#handleFormCancel = onFormCancel;
     this._setState(EditPointView.parsePointToState({ point }));
     this._restoreHandlers();
@@ -46,17 +48,18 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
-    this.element.querySelector('form')
-      .addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn')
+    const form = this.element.querySelector('form');
+    form.addEventListener('submit', this.#formSubmitHandler);
+    form.addEventListener('reset', this.#formResetHandler);
+    form.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#formCancelHandler);
-    this.element.querySelector('.event__type-group')
+    form.querySelector('.event__type-group')
       .addEventListener('change', this.#typeChangeHandler);
-    this.element.querySelector('.event__input--destination')
+    form.querySelector('.event__input--destination')
       .addEventListener('change', this.#destinationChangeHandler);
-    this.element.querySelector('.event__input--price')
+    form.querySelector('.event__input--price')
       .addEventListener('change', this.#priceChangeHandler);
-    this.element.querySelector('.event__available-offers')
+    form.querySelector('.event__available-offers')
       ?.addEventListener('change', this.#offerChangeHandler);
     this.#setDatepickers();
   }
@@ -156,6 +159,11 @@ export default class EditPointView extends AbstractStatefulView {
     this.#handleFormSubmit(EditPointView.parseStateToPoint(this._state));
   };
 
+  #formResetHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormReset(EditPointView.parseStateToPoint(this._state));
+  };
+
   #formCancelHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormCancel();
@@ -188,7 +196,7 @@ function createEditPointViewTemplate({ state, destinations, offers }) {
             <label class="event__label  event__type-output" for="event-destination-${id}">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${selectedDestination ? selectedDestination.name : ''}" list="destination-list-${id}">
+            <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${selectedDestination ? selectedDestination.name : ''}" list="destination-list-${id}" required>
             <datalist id="destination-list-${id}">
               ${createDestinationOptionsTemplate({ destinations })}
             </datalist>
@@ -207,7 +215,7 @@ function createEditPointViewTemplate({ state, destinations, offers }) {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-${id}" type="number" min="0" name="event-price" value="${basePrice}">
+            <input class="event__input  event__input--price" id="event-price-${id}" type="number" min="0" name="event-price" value="${basePrice}" required>
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>

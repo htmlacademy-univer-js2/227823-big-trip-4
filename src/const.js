@@ -41,5 +41,17 @@ const ENABLED_SORT_TYPES = [
   SortTypes.DAY, SortTypes.TIME, SortTypes.PRICE
 ];
 
-export { POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES };
+const UpdateType = {
+  PATCH: 'patch',
+  MINOR: 'minor',
+  MAJOR: 'major'
+};
+
+const UserAction = {
+  ADD_POINT: 'add-point',
+  UPDATE_POINT: 'update-point',
+  REMOVE_POINT: 'remove-point',
+};
+
+export { POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES, UpdateType, UserAction };
 
