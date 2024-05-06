@@ -8,7 +8,7 @@ export default class PointsModel extends Observable {
 
   constructor(destinationsModel, offersModel) {
     super();
-    const pointCount = { MIN: 0, MAX: 5};
+    const pointCount = { MIN: 0, MAX: 5 };
     this.#points = Array.from({ length: getRandomInteger(pointCount.MIN, pointCount.MAX) }, () => {
       const destination = getRandomValue(destinationsModel.get());
       const type = getRandomValue(POINT_TYPES);

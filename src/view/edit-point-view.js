@@ -130,20 +130,22 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromCloseHandler = ([date]) => {
+    date ??= null;
     this._setState({
       point: {
         ...this._state.point,
-        dateFrom: date.toISOString()
+        dateFrom: date && date.toISOString()
       }
     });
     this.#datepickerTo.set('minDate', this._state.point.dateFrom);
   };
 
   #dateToCloseHandler = ([date]) => {
+    date ??= null;
     this._setState({
       point: {
         ...this._state.point,
-        dateTo: date.toISOString()
+        dateTo: date && date.toISOString()
       }
     });
     this.#datepickerFrom.set('maxDate', this._state.point.dateTo);
@@ -229,9 +231,9 @@ function createEditPointViewTemplate({ state, destinations, offers, isCreating }
             <span class="visually-hidden">Open event</span>
           </button>
         </header>
-        ${selectedDestination || suitableOffers.length > 0 ? /* html */`
+        ${suitableOffers.length || (selectedDestination && (selectedDestination.description.length || selectedDestination.pictures.length)) ? /* html */`
           <section class="event__details">
-            ${suitableOffers.length > 0 ? createOffersTemplate({ pointId: id, selectedOffersIds, offers: suitableOffers }) : ''}
+            ${suitableOffers.length ? createOffersTemplate({ pointId: id, selectedOffersIds, offers: suitableOffers }) : ''}
             ${selectedDestination ? createDestinationTemplate({ destination: selectedDestination }) : ''}
           </section>` : ''}
       </form>
@@ -277,7 +279,7 @@ function createOffersTemplate({ pointId, selectedOffersIds, offers }) {
 }
 
 function createDestinationTemplate({ destination }) {
-  return destination.description.length && destination.pictures.length
+  return destination.description.length || destination.pictures.length
     ? /* html */`
       <section class="event__section  event__section--destination" >
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
