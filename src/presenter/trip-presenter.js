@@ -3,9 +3,10 @@ import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointListEmptyView from '../view/point-list-empty-view.js';
 import PointPresenter, { PointMode } from './point-presenter.js';
-import { ENABLED_SORT_TYPES, SortTypes, UpdateType, UserAction } from '../const.js';
+import { ENABLED_SORT_TYPES, FilterType, SortTypes, UpdateType, UserAction } from '../const.js';
 import { sort } from '../utils/sort.js';
 import { filter } from '../utils/filter.js';
+import NewPointPresenter from './new-point-presenter.js';
 
 export default class TripPresenter {
   #container = null;
@@ -13,23 +14,35 @@ export default class TripPresenter {
   #offersModel = null;
   #pointsModel = null;
   #filterModel = null;
+  #pointCreationStateModel = null;
 
   #sortView = null;
   #pointListView = new PointListView();
   #emptyListView = null;
   #pointPresenters = new Map();
+  #newPointPresenter = null;
   #openedEditPointId = null;
   #currentSortType = SortTypes.DAY;
 
-  constructor({ container, destinationsModel, offersModel, pointsModel, filterModel }) {
+  constructor({ container, destinationsModel, offersModel, pointsModel, filterModel, pointCreationStateModel }) {
     this.#container = container;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
+    this.#pointCreationStateModel = pointCreationStateModel;
+
+    this.#newPointPresenter = new NewPointPresenter({
+      container: this.#pointListView.element,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
+      onDataChange: this.#viewActionHandler,
+      onDestroy: this.#newPointDestroyHandler
+    });
 
     this.#pointsModel.addObserver(this.#modelEventHandler);
     this.#filterModel.addObserver(this.#modelEventHandler);
+    this.#pointCreationStateModel.addObserver(this.#pointCreationStateChangeHandler);
   }
 
   init() {
@@ -44,7 +57,7 @@ export default class TripPresenter {
 
   #renderTrip() {
     const points = this.points;
-    if (points.length === 0) {
+    if (points.length === 0 && !this.#pointCreationStateModel.isCreating) {
       this.#renderEmptyListView();
       return;
     }
@@ -100,6 +113,18 @@ export default class TripPresenter {
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
+  #modeChangeHandler = (id, mode) => {
+    if (mode === PointMode.DEFAULT) {
+      this.#openedEditPointId = null;
+    } else {
+      if (this.#openedEditPointId !== null) {
+        this.#pointPresenters.get(this.#openedEditPointId).resetView();
+      }
+      this.#openedEditPointId = id;
+      this.#newPointPresenter.destroy();
+    }
+  };
+
   #clearTrip() {
     this.#clearPoints();
     remove(this.#sortView);
@@ -111,6 +136,7 @@ export default class TripPresenter {
   #clearPoints() {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
+    this.#newPointPresenter.destroy();
     this.#openedEditPointId = null;
   }
 
@@ -120,20 +146,29 @@ export default class TripPresenter {
     this.#renderTrip();
   };
 
-  #modeChangeHandler = (id, mode) => {
-    if (mode === PointMode.DEFAULT) {
-      this.#openedEditPointId = null;
+  #pointCreationStateChangeHandler = (isCreating) => {
+    if (isCreating === this.#newPointPresenter.initialized) {
+      return;
+    }
+    if (isCreating) {
+      this.#currentSortType = SortTypes.DAY;
+      this.#filterModel.set(UpdateType.MAJOR, FilterType.EVERYTHING);
+      this.#newPointPresenter.init();
     } else {
-      if (this.#openedEditPointId !== null) {
-        this.#pointPresenters.get(this.#openedEditPointId).resetView();
-      }
-      this.#openedEditPointId = id;
+      this.#newPointPresenter.destroy();
+    }
+  };
+
+  #newPointDestroyHandler = () => {
+    this.#pointCreationStateModel.isCreating = false;
+    if (this.#pointsModel.get().length === 0) {
+      this.#modelEventHandler(UpdateType.MINOR);
     }
   };
 
   #viewActionHandler = (actionType, updateType, data) => {
     switch (actionType) {
-      case UserAction.ADD_POINT:
+      case UserAction.CREATE_POINT:
         this.#pointsModel.add(updateType, data);
         break;
       case UserAction.UPDATE_POINT:
@@ -141,6 +176,8 @@ export default class TripPresenter {
         break;
       case UserAction.REMOVE_POINT:
         this.#pointsModel.remove(updateType, data);
+        break;
+      default:
         break;
     }
   };
@@ -158,6 +195,8 @@ export default class TripPresenter {
         this.#currentSortType = SortTypes.DAY;
         this.#clearTrip();
         this.#renderTrip();
+        break;
+      default:
         break;
     }
   };
