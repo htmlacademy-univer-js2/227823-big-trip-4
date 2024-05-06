@@ -1,5 +1,4 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { formatDateToDateTime } from '../utils/point.js';
 import { POINT_TYPES, POINT_EMPTY } from '../const.js';
 import { capitalizeFirstLetter } from '../utils/common.js';
 import flatpickr from 'flatpickr';
@@ -9,16 +8,20 @@ export default class EditPointView extends AbstractStatefulView {
   #destinations = null;
   #offers = null;
   #handleFormSubmit = null;
+  #handleFormReset = null;
   #handleFormCancel = null;
   #datepickerFrom = null;
   #datepickerTo = null;
+  #isCreating = false;
 
-  constructor({ point = POINT_EMPTY, destinations, offers, onFormSubmit, onFormCancel }) {
+  constructor({ point = POINT_EMPTY, destinations, offers, onFormSubmit, onFormReset, onFormCancel, isCreating = false }) {
     super();
     this.#destinations = destinations;
     this.#offers = offers;
     this.#handleFormSubmit = onFormSubmit;
+    this.#handleFormReset = onFormReset;
     this.#handleFormCancel = onFormCancel;
+    this.#isCreating = isCreating;
     this._setState(EditPointView.parsePointToState({ point }));
     this._restoreHandlers();
   }
@@ -27,7 +30,8 @@ export default class EditPointView extends AbstractStatefulView {
     return createEditPointViewTemplate({
       state: this._state,
       destinations: this.#destinations,
-      offers: this.#offers
+      offers: this.#offers,
+      isCreating: this.#isCreating,
     });
   }
 
@@ -46,17 +50,20 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
-    this.element.querySelector('form')
-      .addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#formCancelHandler);
-    this.element.querySelector('.event__type-group')
+    const form = this.element.querySelector('form');
+    form.addEventListener('submit', this.#formSubmitHandler);
+    form.addEventListener('reset', this.#formResetHandler);
+    if (!this.#isCreating) {
+      form.querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#formCancelHandler);
+    }
+    form.querySelector('.event__type-group')
       .addEventListener('change', this.#typeChangeHandler);
-    this.element.querySelector('.event__input--destination')
+    form.querySelector('.event__input--destination')
       .addEventListener('change', this.#destinationChangeHandler);
-    this.element.querySelector('.event__input--price')
+    form.querySelector('.event__input--price')
       .addEventListener('change', this.#priceChangeHandler);
-    this.element.querySelector('.event__available-offers')
+    form.querySelector('.event__available-offers')
       ?.addEventListener('change', this.#offerChangeHandler);
     this.#setDatepickers();
   }
@@ -70,6 +77,7 @@ export default class EditPointView extends AbstractStatefulView {
         firstDayOfWeek: 1,
       },
       'time_24hr': true,
+      allowInput: true,
     };
     this.#datepickerFrom = flatpickr(
       dateFromElement,
@@ -122,20 +130,22 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromCloseHandler = ([date]) => {
+    date ??= null;
     this._setState({
       point: {
         ...this._state.point,
-        dateFrom: date.toISOString()
+        dateFrom: date && date.toISOString()
       }
     });
     this.#datepickerTo.set('minDate', this._state.point.dateFrom);
   };
 
   #dateToCloseHandler = ([date]) => {
+    date ??= null;
     this._setState({
       point: {
         ...this._state.point,
-        dateTo: date.toISOString()
+        dateTo: date && date.toISOString()
       }
     });
     this.#datepickerFrom.set('maxDate', this._state.point.dateTo);
@@ -156,6 +166,11 @@ export default class EditPointView extends AbstractStatefulView {
     this.#handleFormSubmit(EditPointView.parseStateToPoint(this._state));
   };
 
+  #formResetHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormReset(EditPointView.parseStateToPoint(this._state));
+  };
+
   #formCancelHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormCancel();
@@ -166,9 +181,9 @@ export default class EditPointView extends AbstractStatefulView {
   static parseStateToPoint = (state) => state.point;
 }
 
-function createEditPointViewTemplate({ state, destinations, offers }) {
+function createEditPointViewTemplate({ state, destinations, offers, isCreating }) {
   const { point } = state;
-  const { id, type, offers: selectedOffersIds, destination: destinationId, basePrice, dateFrom, dateTo } = point;
+  const { id, type, offers: selectedOffersIds, destination: destinationId, basePrice } = point;
   const selectedDestination = destinationId && destinations.find((destination) => destination.id === destinationId);
   const suitableOffers = offers.find((offer) => offer.type === type).offers;
 
@@ -188,7 +203,7 @@ function createEditPointViewTemplate({ state, destinations, offers }) {
             <label class="event__label  event__type-output" for="event-destination-${id}">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${selectedDestination ? selectedDestination.name : ''}" list="destination-list-${id}">
+            <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${selectedDestination ? selectedDestination.name : ''}" list="destination-list-${id}" required>
             <datalist id="destination-list-${id}">
               ${createDestinationOptionsTemplate({ destinations })}
             </datalist>
@@ -196,10 +211,10 @@ function createEditPointViewTemplate({ state, destinations, offers }) {
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-${id}">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${formatDateToDateTime(dateFrom)}">
+            <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" required>
             &mdash;
             <label class="visually-hidden" for="event-end-time-${id}">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${formatDateToDateTime(dateTo)}">
+            <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" required>
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -207,18 +222,18 @@ function createEditPointViewTemplate({ state, destinations, offers }) {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-${id}" type="number" min="0" name="event-price" value="${basePrice}">
+            <input class="event__input  event__input--price" id="event-price-${id}" type="number" min="0" name="event-price" value="${basePrice}" required>
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">Delete</button>
-          <button class="event__rollup-btn" type="button">
+          <button class="event__reset-btn" type="reset">${isCreating ? 'Cancel' : 'Delete'}</button>
+          ${isCreating ? '' : '<button class="event__rollup-btn" type="button">'}
             <span class="visually-hidden">Open event</span>
           </button>
         </header>
-        ${selectedDestination || suitableOffers.length > 0 ? /* html */`
+        ${suitableOffers.length || (selectedDestination && (selectedDestination.description.length || selectedDestination.pictures.length)) ? /* html */`
           <section class="event__details">
-            ${suitableOffers.length > 0 ? createOffersTemplate({ pointId: id, selectedOffersIds, offers: suitableOffers }) : ''}
+            ${suitableOffers.length ? createOffersTemplate({ pointId: id, selectedOffersIds, offers: suitableOffers }) : ''}
             ${selectedDestination ? createDestinationTemplate({ destination: selectedDestination }) : ''}
           </section>` : ''}
       </form>
@@ -264,7 +279,7 @@ function createOffersTemplate({ pointId, selectedOffersIds, offers }) {
 }
 
 function createDestinationTemplate({ destination }) {
-  return destination.description.length && destination.pictures.length
+  return destination.description.length || destination.pictures.length
     ? /* html */`
       <section class="event__section  event__section--destination" >
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>

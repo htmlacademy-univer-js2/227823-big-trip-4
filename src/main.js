@@ -5,22 +5,34 @@ import PointsModel from './model/points-model.js';
 import TripPresenter from './presenter/trip-presenter.js';
 import FilterPresenter from './presenter/filter-presenter.js';
 import FilterModel from './model/filter-model.js';
-import { getRandomFilter } from './mock/filter.js';
+import PointCreationStateModel from './model/point-creation-state-model.js';
+import NewPointButtonPresenter from './presenter/new-point-button-presenter.js';
+import TripInfoPresenter from './presenter/trip-info-presenter.js';
 
-
-const filterContainer = document.querySelector('.trip-controls__filters');
+const headerTripContainer = document.querySelector('.trip-main');
+const filterContainer = headerTripContainer.querySelector('.trip-controls__filters');
 const tripContainer = document.querySelector('.trip-events');
 
 const destinationsModel = new DestinationsModel();
 const offersModel = new OffersModel();
 const pointsModel = new PointsModel(destinationsModel, offersModel);
 const filterModel = new FilterModel();
-filterModel.set(getRandomFilter());
+const pointCreationStateModel = new PointCreationStateModel();
 
+const tripInfoPresenter = new TripInfoPresenter({
+  container: headerTripContainer,
+  pointsModel,
+  destinationsModel,
+  offersModel,
+});
 const filterPresenter = new FilterPresenter({
   container: filterContainer,
   filterModel,
   pointsModel,
+});
+const newPointButtonPresenter = new NewPointButtonPresenter({
+  container: headerTripContainer,
+  pointCreationStateModel,
 });
 const tripPresenter = new TripPresenter({
   container: tripContainer,
@@ -28,7 +40,10 @@ const tripPresenter = new TripPresenter({
   offersModel,
   pointsModel,
   filterModel,
+  pointCreationStateModel,
 });
 
+tripInfoPresenter.init();
 filterPresenter.init();
+newPointButtonPresenter.init();
 tripPresenter.init();

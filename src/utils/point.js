@@ -44,6 +44,12 @@ const getDateDifference = (pointA, pointB) => dayjs(pointB.dateFrom).diff(dayjs(
 const getDurationDifference = (pointA, pointB) => (dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom))) - (dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom)));
 const getPriceDifference = (pointA, pointB) => pointB.basePrice - pointA.basePrice;
 
+function isBigDifference(pointA, pointB) {
+  return pointA.dateFrom !== pointB.dateFrom
+    || pointA.basePrice !== pointB.basePrice
+    || getDurationDifference(pointA, pointB) !== 0;
+}
+
 export {
   formatDateToShortDate,
   formatDateToDateTimeHTML,
@@ -56,4 +62,5 @@ export {
   getDateDifference,
   getDurationDifference,
   getPriceDifference,
+  isBigDifference
 };

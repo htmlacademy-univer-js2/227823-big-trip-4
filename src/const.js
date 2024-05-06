@@ -14,12 +14,12 @@ const POINT_TYPES = [
 const POINT_EMPTY = {
   id: crypto.randomUUID(),
   basePrice: 0,
-  dateFrom: Date.now(),
-  dateTo: Date.now(),
+  dateFrom: null,
+  dateTo: null,
   destination: null,
   isFavorite: false,
   offers: [],
-  type: POINT_TYPES[0]
+  type: POINT_TYPES[5]
 };
 
 const FilterType = {
@@ -41,5 +41,17 @@ const ENABLED_SORT_TYPES = [
   SortTypes.DAY, SortTypes.TIME, SortTypes.PRICE
 ];
 
-export { POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES };
+const UpdateType = {
+  PATCH: 'patch',
+  MINOR: 'minor',
+  MAJOR: 'major'
+};
+
+const UserAction = {
+  CREATE_POINT: 'create-point',
+  UPDATE_POINT: 'update-point',
+  REMOVE_POINT: 'remove-point',
+};
+
+export { POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES, UpdateType, UserAction };
 
