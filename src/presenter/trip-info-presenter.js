@@ -1,4 +1,4 @@
-import { SortTypes } from '../const';
+import { DESTINATION_POINTS_LENGTH, SortTypes } from '../const';
 import { render, replace, remove, RenderPosition } from '../framework/render';
 import { sort } from '../utils/sort';
 import TripInfoView from '../view/trip-info-view';
@@ -37,7 +37,7 @@ export default class TripInfoPresenter {
 
   #createPointsInfo(points) {
     const sortedPoints = sort[SortTypes.DAY](points).reverse();
-    const short = sortedPoints.length > 3;
+    const short = sortedPoints.length > DESTINATION_POINTS_LENGTH;
     return {
       short: short,
       destinations: (short ? [sortedPoints[0], sortedPoints[sortedPoints.length - 1]] : sortedPoints)

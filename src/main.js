@@ -8,14 +8,21 @@ import FilterModel from './model/filter-model.js';
 import PointCreationStateModel from './model/point-creation-state-model.js';
 import NewPointButtonPresenter from './presenter/new-point-button-presenter.js';
 import TripInfoPresenter from './presenter/trip-info-presenter.js';
+import TripApiService from './trip-api-service.js';
+
+const AUTHORIZATION = 'Basic bda8df0e-7278-5c3e-86d6-8924fa646147';
+const END_POINT = 'https://21.objects.htmlacademy.pro/big-trip';
+
+const tripApiService = new TripApiService(END_POINT, AUTHORIZATION);
 
 const headerTripContainer = document.querySelector('.trip-main');
 const filterContainer = headerTripContainer.querySelector('.trip-controls__filters');
 const tripContainer = document.querySelector('.trip-events');
 
-const destinationsModel = new DestinationsModel();
-const offersModel = new OffersModel();
-const pointsModel = new PointsModel(destinationsModel, offersModel);
+const destinationsModel = new DestinationsModel(tripApiService);
+const offersModel = new OffersModel(tripApiService);
+const pointsModel = new PointsModel(tripApiService, destinationsModel, offersModel);
+
 const filterModel = new FilterModel();
 const pointCreationStateModel = new PointCreationStateModel();
 
@@ -32,6 +39,7 @@ const filterPresenter = new FilterPresenter({
 });
 const newPointButtonPresenter = new NewPointButtonPresenter({
   container: headerTripContainer,
+  pointsModel,
   pointCreationStateModel,
 });
 const tripPresenter = new TripPresenter({
@@ -47,3 +55,5 @@ tripInfoPresenter.init();
 filterPresenter.init();
 newPointButtonPresenter.init();
 tripPresenter.init();
+
+pointsModel.init();

@@ -1,7 +1,7 @@
 import { remove, render, replace } from '../framework/render.js';
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
-import PointListEmptyView from '../view/point-list-empty-view.js';
+import MessageView from '../view/message-view.js';
 import PointPresenter, { PointMode } from './point-presenter.js';
 import { ENABLED_SORT_TYPES, FilterType, SortTypes, UpdateType, UserAction } from '../const.js';
 import { sort } from '../utils/sort.js';
@@ -10,6 +10,7 @@ import NewPointPresenter from './new-point-presenter.js';
 
 export default class TripPresenter {
   #container = null;
+
   #destinationsModel = null;
   #offersModel = null;
   #pointsModel = null;
@@ -18,11 +19,14 @@ export default class TripPresenter {
 
   #sortView = null;
   #pointListView = new PointListView();
-  #emptyListView = null;
+  #MessageView = null;
+
+  #currentSortType = SortTypes.DAY;
   #pointPresenters = new Map();
   #newPointPresenter = null;
   #openedEditPointId = null;
-  #currentSortType = SortTypes.DAY;
+  #isLoading = true;
+  #isLoadingError = false;
 
   constructor({ container, destinationsModel, offersModel, pointsModel, filterModel, pointCreationStateModel }) {
     this.#container = container;
@@ -56,9 +60,14 @@ export default class TripPresenter {
   }
 
   #renderTrip() {
+    if (this.#isLoading || this.#isLoadingError) {
+      this.#renderLoadingMessage();
+      return;
+    }
+
     const points = this.points;
     if (points.length === 0 && !this.#pointCreationStateModel.isCreating) {
-      this.#renderEmptyListView();
+      this.#renderEmptyList();
       return;
     }
 
@@ -86,9 +95,14 @@ export default class TripPresenter {
     }
   }
 
-  #renderEmptyListView() {
-    this.#emptyListView = new PointListEmptyView({ filter: this.#filterModel.get() });
-    render(this.#emptyListView, this.#container);
+  #renderLoadingMessage() {
+    this.#MessageView = new MessageView({ isLoading: this.#isLoading, isLoadingError: this.#isLoadingError });
+    render(this.#MessageView, this.#container);
+  }
+
+  #renderEmptyList() {
+    this.#MessageView = new MessageView({ filter: this.#filterModel.get() });
+    render(this.#MessageView, this.#container);
   }
 
   #renderPointsList() {
@@ -128,9 +142,9 @@ export default class TripPresenter {
   #clearTrip() {
     this.#clearPoints();
     remove(this.#sortView);
-    remove(this.#emptyListView);
+    remove(this.#MessageView);
     this.#sortView = null;
-    this.#emptyListView = null;
+    this.#MessageView = null;
   }
 
   #clearPoints() {
@@ -167,8 +181,10 @@ export default class TripPresenter {
   };
 
   #viewActionHandler = (actionType, updateType, data) => {
+    // TODO lock
     switch (actionType) {
       case UserAction.CREATE_POINT:
+        // TODO lock presenter
         this.#pointsModel.add(updateType, data);
         break;
       case UserAction.UPDATE_POINT:
@@ -193,6 +209,12 @@ export default class TripPresenter {
         break;
       case UpdateType.MAJOR:
         this.#currentSortType = SortTypes.DAY;
+        this.#clearTrip();
+        this.#renderTrip();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        this.#isLoadingError = data.isError;
         this.#clearTrip();
         this.#renderTrip();
         break;

@@ -1,3 +1,4 @@
+const DESTINATION_POINTS_LENGTH = 3;
 
 const POINT_TYPES = [
   'taxi',
@@ -12,7 +13,6 @@ const POINT_TYPES = [
 ];
 
 const POINT_EMPTY = {
-  id: crypto.randomUUID(),
   basePrice: 0,
   dateFrom: null,
   dateTo: null,
@@ -42,9 +42,10 @@ const ENABLED_SORT_TYPES = [
 ];
 
 const UpdateType = {
+  INIT: 'init',
   PATCH: 'patch',
   MINOR: 'minor',
-  MAJOR: 'major'
+  MAJOR: 'major',
 };
 
 const UserAction = {
@@ -53,5 +54,5 @@ const UserAction = {
   REMOVE_POINT: 'remove-point',
 };
 
-export { POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES, UpdateType, UserAction };
+export { DESTINATION_POINTS_LENGTH, POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES, UpdateType, UserAction };
 

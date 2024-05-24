@@ -1,20 +1,31 @@
+import { UpdateType } from '../const.js';
 import Observable from '../framework/observable.js';
-import { POINT_TYPES } from '../const.js';
-import { generatePoint } from '../mock/point.js';
-import { getRandomInteger, getRandomValue } from '../utils/common.js';
 
 export default class PointsModel extends Observable {
+  #service = null;
   #points = [];
+  #destinationsModel = null;
+  #offersModel = null;
 
-  constructor(destinationsModel, offersModel) {
+  constructor(service, destinationsModel, offersModel) {
     super();
-    const pointCount = { MIN: 0, MAX: 5 };
-    this.#points = Array.from({ length: getRandomInteger(pointCount.MIN, pointCount.MAX) }, () => {
-      const destination = getRandomValue(destinationsModel.get());
-      const type = getRandomValue(POINT_TYPES);
-      const offers = offersModel.getByType(type).slice(0, getRandomInteger(0, 3));
-      return generatePoint(destination.id, type, offers.map((offer) => offer.id));
-    });
+    this.#service = service;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
+  }
+
+  async init() {
+    try {
+      await Promise.all([
+        this.#destinationsModel.init(),
+        this.#offersModel.init()
+      ]);
+      this.#points = await this.#service.points;
+      this._notify(UpdateType.INIT, { isError: false });
+    } catch {
+      this.#points = [];
+      this._notify(UpdateType.INIT, { isError: true });
+    }
   }
 
   get() {
@@ -25,20 +36,36 @@ export default class PointsModel extends Observable {
     return this.#points.find((point) => point.id === id);
   }
 
-  add(updateType, point) {
-    this.#points.push(point);
-    this._notify(updateType, point);
+  async add(updateType, point) {
+    try {
+      const newPoint = await this.#service.addPoint(point);
+      this.#points.push(newPoint);
+      this._notify(updateType, newPoint);
+    } catch {
+      throw Error('Can\'t add point');
+    }
   }
 
-  update(updateType, point) {
-    const index = this.#points.findIndex((current) => current.id === point.id);
-    this.#points[index] = point;
-    this._notify(updateType, point);
+  async update(updateType, point) {
+    try {
+      const updatedPoint = await this.#service.updatePoint(point);
+      const index = this.#points.findIndex((current) => current.id === point.id);
+      this.#points[index] = updatedPoint;
+      this._notify(updateType, updatedPoint);
+    } catch {
+      throw Error('Can\'t update point');
+    }
+
   }
 
-  remove(updateType, point) {
-    const index = this.#points.findIndex((current) => current.id === point.id);
-    this.#points.splice(index, 1);
-    this._notify(updateType, point);
+  async remove(updateType, point) {
+    try {
+      await this.#service.deletePoint(point);
+      const index = this.#points.findIndex((current) => current.id === point.id);
+      this.#points.splice(index, 1);
+      this._notify(updateType, point);
+    } catch {
+      throw Error('Can\'t remove point');
+    }
   }
 }
