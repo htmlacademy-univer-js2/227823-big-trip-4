@@ -35,7 +35,8 @@ function createFilterTemplate({ activeFilters, selected }) {
   function createFilter(filter, enabled, checked) {
     return /* html */`
       <div class="trip-filters__filter">
-        <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" data-filter-type="${filter}" value="${filter}" ${enabled ? '' : 'disabled'} ${checked ? 'checked' : ''}>
+        <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter"
+          data-filter-type="${filter}" value="${filter}" ${enabled ? '' : 'disabled'} ${checked ? 'checked' : ''}>
         <label class="trip-filters__filter-label" for="filter-${filter}">${capitalizeFirstLetter(filter)}</label>
       </div>`;
   }
