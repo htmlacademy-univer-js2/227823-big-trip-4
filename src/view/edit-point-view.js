@@ -2,6 +2,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { POINT_TYPES, POINT_EMPTY } from '../const.js';
 import { capitalizeFirstLetter } from '../utils/common.js';
 import flatpickr from 'flatpickr';
+import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
 
 export default class EditPointView extends AbstractStatefulView {
@@ -188,7 +189,9 @@ export default class EditPointView extends AbstractStatefulView {
 
 function createEditPointViewTemplate({ state, destinations, offers, isCreating }) {
   const { point, isDisabled, isSaving, isDeleting } = state;
-  const { id, type, offers: selectedOffersIds, destination: destinationId, basePrice } = point;
+  const { offers: selectedOffersIds, destination: destinationId, basePrice } = point;
+  const id = point.id && he.encode(point.id);
+  const type = he.encode(point.type);
   const selectedDestination = destinationId && destinations.find((destination) => destination.id === destinationId);
   const suitableOffers = offers.find((offer) => offer.type === type).offers;
 
@@ -209,7 +212,7 @@ function createEditPointViewTemplate({ state, destinations, offers, isCreating }
               ${type}
             </label>
             <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination"
-              value="${selectedDestination ? selectedDestination.name : ''}" list="destination-list-${id}" ${isDisabled ? 'disabled' : ''} required>
+              value="${selectedDestination ? he.encode(selectedDestination.name) : ''}" list="destination-list-${id}" ${isDisabled ? 'disabled' : ''} required>
             <datalist id="destination-list-${id}">
               ${createDestinationOptionsTemplate({ destinations })}
             </datalist>
@@ -231,7 +234,7 @@ function createEditPointViewTemplate({ state, destinations, offers, isCreating }
               &euro;
             </label>
             <input class="event__input  event__input--price" id="event-price-${id}" type="number" min="0" name="event-price"
-              value="${basePrice}" ${isDisabled ? 'disabled' : ''} required>
+              value="${he.encode(String(basePrice))}" ${isDisabled ? 'disabled' : ''} required>
           </div>
 
           ${createPointEditControlsTemplate({ isCreating, isDisabled, isSaving, isDeleting })}
@@ -278,7 +281,7 @@ function createEventTypesTemplate({ pointId, eventTypes, selectedType }) {
 }
 
 function createDestinationOptionsTemplate({ destinations }) {
-  return destinations.map((destination) => `<option value="${destination.name}"></option>`).join('');
+  return destinations.map((destination) => `<option value="${he.encode(destination.name)}"></option>`).join('');
 }
 
 function createOffersTemplate({ pointId, selectedOffersIds, offers, isDisabled }) {
@@ -288,12 +291,12 @@ function createOffersTemplate({ pointId, selectedOffersIds, offers, isDisabled }
       <div class="event__available-offers">
         ${offers.map((offer) => /* html */`
           <div class="event__offer-selector">
-            <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.id}-${pointId}" type="checkbox" name="event-offer-${offer.title}"
-              data-offer-id="${offer.id}" ${selectedOffersIds.includes(offer.id) ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
-            <label class="event__offer-label" for="event-offer-${offer.id}-${pointId}">
-              <span class="event__offer-title">${offer.title}</span>
+            <input class="event__offer-checkbox  visually-hidden" id="event-offer-${he.encode(offer.id)}-${pointId}" type="checkbox" name="event-offer-${he.encode(offer.title)}"
+              data-offer-id="${he.encode(offer.id)}" ${selectedOffersIds.includes(offer.id) ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+            <label class="event__offer-label" for="event-offer-${he.encode(offer.id)}-${pointId}">
+              <span class="event__offer-title">${he.encode(offer.title)}</span>
               &plus;&euro;&nbsp;
-              <span class="event__offer-price">${offer.price}</span>
+              <span class="event__offer-price">${he.encode(String(offer.price))}</span>
             </label>
           </div>`).join('')}
       </div>
@@ -305,7 +308,7 @@ function createDestinationTemplate({ destination }) {
     ? /* html */`
       <section class="event__section  event__section--destination" >
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        ${destination.description.length ? `<p class="event__destination-description">${destination.description}</p>` : ''}
+        ${destination.description.length ? `<p class="event__destination-description">${he.encode(destination.description)}</p>` : ''}
         ${destination.pictures.length ? createImagesTemplate({ pictures: destination.pictures }) : ''}
       </section>`
     : '';
@@ -315,7 +318,7 @@ function createImagesTemplate({ pictures }) {
   return /* html */`
     <div class="event__photos-container">
       <div class="event__photos-tape">
-        ${pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
+        ${pictures.map((picture) => `<img class="event__photo" src="${he.encode(picture.src)}" alt="${he.encode(picture.description)}">`).join('')}
       </div>
     </div>`;
 }

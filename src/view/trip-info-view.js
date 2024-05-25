@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import he from 'he';
 import AbstractView from '../framework/view/abstract-view';
 
 export default class TripInfoView extends AbstractView {
@@ -42,7 +43,7 @@ function createPathTemplate({ short, destinations, dateFrom, dateTo }) {
   return /* html */`
     <div class="trip-info__main">
       <h1 class="trip-info__title">
-        ${short ? `${destinations[0]} — ... — ${destinations[destinations.length - 1]}` : destinations.join(' — ')}</h1>
+        ${he.encode(short ? `${destinations[0]} — ... — ${destinations[destinations.length - 1]}` : destinations.join(' — '))}</h1>
       <p class="trip-info__dates">${getDateRange(dateFrom, dateTo)}</p>
     </div>
   `;
@@ -57,7 +58,7 @@ function getDateRange(dateFrom, dateTo) {
 function createTotalCostTemplate({ totalCost }) {
   return /* html */`
     <p class="trip-info__cost">
-      Total: €&nbsp;<span class="trip-info__cost-value">${totalCost}</span>
+      Total: €&nbsp;<span class="trip-info__cost-value">${he.encode(String(totalCost))}</span>
     </p>
   `;
 }
