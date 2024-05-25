@@ -75,6 +75,44 @@ export default class PointPresenter {
     remove(this.#pointEditView);
   }
 
+  setSaving() {
+    if (this.#mode === PointMode.DEFAULT) {
+      this.#pointDefaultView.lock();
+      return;
+    }
+    this.#pointEditView.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setDeleting() {
+    if (this.#mode === PointMode.DEFAULT) {
+      return;
+    }
+    this.#pointEditView.updateElement({
+      isDisabled: true,
+      isDeleting: true,
+    });
+  }
+
+  setAborting() {
+    if (this.#mode === PointMode.DEFAULT) {
+      const unlockPoint = () => this.#pointDefaultView.unlock();
+      this.#pointDefaultView.shake(unlockPoint);
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#pointEditView.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+    this.#pointEditView.shake(resetFormState);
+  }
+
   #replacePointToForm() {
     this.#mode = PointMode.EDIT;
     document.addEventListener('keydown', this.#escKeyDownHandler);
@@ -111,8 +149,6 @@ export default class PointPresenter {
       isMinor ? UpdateType.MINOR : UpdateType.PATCH,
       updatePoint
     );
-
-    this.#replaceFormToPoint();
   };
 
   #deleteClickHandler = (updatePoint) => {

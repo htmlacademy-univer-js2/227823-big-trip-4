@@ -1,7 +1,6 @@
 import { FilterType } from '../const.js';
 import { isPointPast, isPointPresent, isPointFuture } from './point.js';
 
-
 const filter = {
   [FilterType.EVERYTHING]: (points) => [...points],
   [FilterType.PAST]: (points) => points.filter((point) => isPointPast(point)),

@@ -33,7 +33,7 @@ export default class NewPointPresenter {
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
 
-  get initialized(){
+  get initialized() {
     return this.#pointEditView !== null;
   }
 
@@ -47,13 +47,30 @@ export default class NewPointPresenter {
     this.#handleDestroy();
   }
 
+  setSaving() {
+    this.#pointEditView.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#pointEditView.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+    this.#pointEditView.shake(resetFormState);
+  }
+
   #formSubmitHandler = (point) => {
     this.#handleDataChange(
       UserAction.CREATE_POINT,
       UpdateType.MINOR,
       point,
     );
-    this.destroy();
   };
 
   #resetClickHandler = () => {

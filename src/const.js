@@ -1,5 +1,3 @@
-const DESTINATION_POINTS_LENGTH = 3;
-
 const POINT_TYPES = [
   'taxi',
   'bus',
@@ -54,5 +52,5 @@ const UserAction = {
   REMOVE_POINT: 'remove-point',
 };
 
-export { DESTINATION_POINTS_LENGTH, POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES, UpdateType, UserAction };
+export { POINT_TYPES, POINT_EMPTY, FilterType, SortTypes, ENABLED_SORT_TYPES, UpdateType, UserAction };
 

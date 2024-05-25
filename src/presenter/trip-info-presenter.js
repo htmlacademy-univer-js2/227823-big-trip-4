@@ -1,7 +1,9 @@
-import { DESTINATION_POINTS_LENGTH, SortTypes } from '../const';
+import { SortTypes } from '../const';
 import { render, replace, remove, RenderPosition } from '../framework/render';
 import { sort } from '../utils/sort';
 import TripInfoView from '../view/trip-info-view';
+
+const DESTINATION_POINTS_LENGTH = 3;
 
 export default class TripInfoPresenter {
   #container = null;
