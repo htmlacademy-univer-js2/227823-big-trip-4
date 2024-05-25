@@ -22,7 +22,7 @@ export default class MessageView extends AbstractView {
 
 function createLoadingTemplate(isError) {
   const message = isError
-    ? 'Something went wrong. Try again in a few minutes.'
+    ? 'Failed to load latest route information'
     : 'Loading...';
   return createMessageTemplate(message);
 }
