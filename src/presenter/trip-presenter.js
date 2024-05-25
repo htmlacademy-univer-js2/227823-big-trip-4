@@ -7,6 +7,12 @@ import { ENABLED_SORT_TYPES, FilterType, SortTypes, UpdateType, UserAction } fro
 import { sort } from '../utils/sort.js';
 import { filter } from '../utils/filter.js';
 import NewPointPresenter from './new-point-presenter.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+
+const UIBlockLimit = {
+  LOWER: 350,
+  UPPER: 1000,
+};
 
 export default class TripPresenter {
   #container = null;
@@ -19,7 +25,11 @@ export default class TripPresenter {
 
   #sortView = null;
   #pointListView = new PointListView();
-  #MessageView = null;
+  #messageView = null;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: UIBlockLimit.LOWER,
+    upperLimit: UIBlockLimit.UPPER,
+  });
 
   #currentSortType = SortTypes.DAY;
   #pointPresenters = new Map();
@@ -96,13 +106,13 @@ export default class TripPresenter {
   }
 
   #renderLoadingMessage() {
-    this.#MessageView = new MessageView({ isLoading: this.#isLoading, isLoadingError: this.#isLoadingError });
-    render(this.#MessageView, this.#container);
+    this.#messageView = new MessageView({ isLoading: this.#isLoading, isLoadingError: this.#isLoadingError });
+    render(this.#messageView, this.#container);
   }
 
   #renderEmptyList() {
-    this.#MessageView = new MessageView({ filter: this.#filterModel.get() });
-    render(this.#MessageView, this.#container);
+    this.#messageView = new MessageView({ filter: this.#filterModel.get() });
+    render(this.#messageView, this.#container);
   }
 
   #renderPointsList() {
@@ -142,9 +152,9 @@ export default class TripPresenter {
   #clearTrip() {
     this.#clearPoints();
     remove(this.#sortView);
-    remove(this.#MessageView);
+    remove(this.#messageView);
     this.#sortView = null;
-    this.#MessageView = null;
+    this.#messageView = null;
   }
 
   #clearPoints() {
@@ -180,22 +190,39 @@ export default class TripPresenter {
     }
   };
 
-  #viewActionHandler = (actionType, updateType, data) => {
-    // TODO lock
+  #viewActionHandler = async (actionType, updateType, point) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.CREATE_POINT:
-        // TODO lock presenter
-        this.#pointsModel.add(updateType, data);
+        this.#newPointPresenter.setSaving();
+        try {
+          await this.#pointsModel.add(updateType, point);
+        } catch {
+          this.#newPointPresenter.setAborting();
+        }
         break;
       case UserAction.UPDATE_POINT:
-        this.#pointsModel.update(updateType, data);
+        this.#pointPresenters.get(point.id).setSaving();
+        try {
+          await this.#pointsModel.update(updateType, point);
+        } catch {
+          this.#pointPresenters.get(point.id).setAborting();
+        }
         break;
       case UserAction.REMOVE_POINT:
-        this.#pointsModel.remove(updateType, data);
+        this.#pointPresenters.get(point.id).setDeleting();
+        try {
+          await this.#pointsModel.remove(updateType, point);
+        } catch {
+          this.#pointPresenters.get(point.id).setAborting();
+        }
         break;
       default:
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #modelEventHandler = (updateType, data) => {
