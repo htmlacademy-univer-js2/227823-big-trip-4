@@ -9,7 +9,7 @@ const filter = {
 };
 
 const some = {
-  [FilterType.EVERYTHING]: () => true,
+  [FilterType.EVERYTHING]: (points) => points.length,
   [FilterType.PAST]: (points) => points.some((point) => isPointPast(point)),
   [FilterType.PRESENT]: (points) => points.some((point) => isPointPresent(point)),
   [FilterType.FUTURE]: (points) => points.some((point) => isPointFuture(point)),
