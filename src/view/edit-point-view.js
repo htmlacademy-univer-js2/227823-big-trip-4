@@ -52,6 +52,11 @@ export default class EditPointView extends AbstractStatefulView {
 
   _restoreHandlers() {
     const form = this.element.querySelector('form');
+    this.#setDatepickers();
+    if (this._state.isDisabled) {
+      return;
+    }
+
     form.addEventListener('submit', this.#formSubmitHandler);
     form.addEventListener('reset', this.#formResetHandler);
     if (!this.#isCreating) {
@@ -66,7 +71,6 @@ export default class EditPointView extends AbstractStatefulView {
       .addEventListener('change', this.#priceChangeHandler);
     form.querySelector('.event__available-offers')
       ?.addEventListener('change', this.#offerChangeHandler);
-    this.#setDatepickers();
   }
 
   #setDatepickers() {
