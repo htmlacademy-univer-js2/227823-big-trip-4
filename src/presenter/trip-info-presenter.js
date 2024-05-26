@@ -38,7 +38,7 @@ export default class TripInfoPresenter {
   }
 
   #createPointsInfo(points) {
-    const sortedPoints = sort[SortTypes.DAY](points).reverse();
+    const sortedPoints = sort[SortTypes.DAY](points);
     const short = sortedPoints.length > DESTINATION_POINTS_LENGTH;
     return {
       short: short,

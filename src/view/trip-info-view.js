@@ -50,9 +50,7 @@ function createPathTemplate({ short, destinations, dateFrom, dateTo }) {
 }
 
 function getDateRange(dateFrom, dateTo) {
-  const from = dayjs(dateFrom);
-  const to = dayjs(dateTo);
-  return `${from.format('MMM DD')}&nbsp;—&nbsp;${to.format(from.isSame(to, 'month') ? 'DD' : 'MMM DD')}`;
+  return `${(dayjs(dateFrom)).format('DD MMM')}&nbsp;—&nbsp;${(dayjs(dateTo)).format('DD MMM')}`;
 }
 
 function createTotalCostTemplate({ totalCost }) {
