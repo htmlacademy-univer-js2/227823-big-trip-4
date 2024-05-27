@@ -22,9 +22,9 @@ const POINT_EMPTY = {
 
 const FilterType = {
   EVERYTHING: 'everything',
-  PAST: 'past',
-  PRESENT: 'present',
   FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
 };
 
 const SortTypes = {

@@ -3,14 +3,6 @@ import duration from 'dayjs/plugin/duration.js';
 
 dayjs.extend(duration);
 
-const MSEC_IN_SEC = 1000;
-const SEC_IN_MIN = 60;
-const MIN_IN_HOUR = 60;
-const HOUR_IN_DAY = 24;
-
-const MSEC_IN_HOUR = MSEC_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR;
-const MSEC_IN_DAY = MSEC_IN_HOUR * HOUR_IN_DAY;
-
 function formatDateToShortDate(date) {
   return dayjs(date).format('MMM DD');
 }
@@ -28,12 +20,15 @@ function formatDateToTime(date) {
 }
 
 function formatDuration(dateFrom, dateTo) {
-  const timeDiff = dayjs(dateTo).diff(dateFrom);
-  const patterns = ['DD[D] ', 'HH[H] ', 'mm[M]'];
-  const patternsSkip = (timeDiff < MSEC_IN_DAY) + (timeDiff < MSEC_IN_HOUR);
-  const pattern = patterns.slice(patternsSkip).join('');
-  const pointDuration = dayjs.duration(timeDiff).format(pattern);
-  return pointDuration;
+  const timeDiff = dayjs.duration(dayjs(dateTo).diff(dateFrom));
+  const asDays = Math.floor(timeDiff.asDays());
+  const asHours = Math.floor(timeDiff.asHours());
+  const pointDuration = [
+    asDays > 0 ? `${String(asDays).padStart(2, '0')}D ` : '',
+    asHours > 0 ? `${String(timeDiff.hours()).padStart(2, '0')}H ` : '',
+    `${String(timeDiff.minutes()).padStart(2, '0')}M`
+  ];
+  return pointDuration.join('');
 }
 
 const isPointPast = (point) => dayjs().isAfter(point.dateTo);
